@@ -59,10 +59,10 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
         if(user.getUserRole()== UserRole.FREELANCER){
-            freelancerService.createFreelancer(user.getUsername());
+            freelancerService.createFreelancer(user.getUsername(),user.getName());
         }
         else{
-            clientService.createClient(user.getUsername());
+            clientService.createClient(user.getUsername(),user.getName());
         }
         return "User Saved Successfully";
     }
