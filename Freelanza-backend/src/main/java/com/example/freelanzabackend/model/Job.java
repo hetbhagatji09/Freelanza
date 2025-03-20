@@ -29,6 +29,7 @@ public class Job {
     private String description;
     private int minBudget;
     private int maxBudget;
+    private Integer budget;
     private String startDate;
     private String deadline;
 
@@ -36,6 +37,7 @@ public class Job {
     @JsonIgnoreProperties("jobs")
     @JoinColumn(name = "client_id", nullable = false)
     private Client client;
+
 
     @Enumerated(EnumType.STRING)
     private JobStatus status=JobStatus.ACTIVE;
