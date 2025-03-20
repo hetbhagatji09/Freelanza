@@ -15,6 +15,8 @@ public class UserCredential {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+    @Transient
+    private String name;
     private String username;
     @Column(unique = true, nullable = false)
     private String password;
