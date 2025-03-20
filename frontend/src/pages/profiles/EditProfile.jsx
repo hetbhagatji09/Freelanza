@@ -1,81 +1,65 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../../contexts/AuthContext.jsx'
+import axios from 'axios'
 
 function EditProfile() {
-  const { currentUser, updateProfile } = useAuth()
+  const { currentUser } = useAuth()
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
   
+  // Updated form data to match backend models
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    title: '',
+    professionalTitle: '', // For client
     bio: '',
     location: '',
-    avatar: '',
-    hourlyRate: '',
-    skills: [],
-    education: [],
-    experience: []
+    hourlyRate: '', // For freelancer
+    skills: []
   })
   
   const [newSkill, setNewSkill] = useState('')
-  const [newEducation, setNewEducation] = useState({
-    degree: '',
-    institution: '',
-    year: ''
-  })
-  const [newExperience, setNewExperience] = useState({
-    title: '',
-    company: '',
-    period: '',
-    description: ''
-  })
+
 
   useEffect(() => {
-    // Simulate loading user data
-    setTimeout(() => {
-      if (currentUser) {
-        // In a real app, you would fetch the full profile data from the API
-        // For demo purposes, we'll use mock data based on the current user
-        const mockProfileData = {
-          name: currentUser.name,
-          email: currentUser.email,
-          title: currentUser.role === 'freelancer' ? 'Senior Full Stack Developer' : 'Project Manager',
-          bio: currentUser.role === 'freelancer' 
-            ? 'Experienced full-stack developer with over 8 years of experience building web applications. I specialize in React, Node.js, and MongoDB, with a focus on creating scalable and maintainable code.'
-            : 'Project manager with 5+ years of experience working with development teams. Passionate about delivering high-quality software solutions that meet business needs.',
-          location: 'New York, USA',
-          avatar: currentUser.avatar,
-          hourlyRate: currentUser.role === 'freelancer' ? '45' : '',
-          skills: ['React', 'Node.js', 'JavaScript', 'TypeScript'],
-          education: [
-            {
-              id: 1,
-              degree: 'Bachelor of Computer Science',
-              institution: 'University of California, Berkeley',
-              year: '2016'
-            }
-          ],
-          experience: [
-            {
-              id: 1,
-              title: currentUser.role === 'freelancer' ? 'Senior Developer' : 'Project Manager',
-              company: 'Tech Innovations Inc.',
-              period: '2020 - Present',
-              description: currentUser.role === 'freelancer'
-                ? 'Lead developer for multiple client projects, focusing on web application development using React and Node.js.'
-                : 'Managed multiple development teams and client projects, ensuring on-time delivery and high-quality results.'
-            }
-          ]
+    const fetchUserData = async () => {
+      try {
+        let endpoint = ''
+        
+        if (currentUser?.userRole === 'FREELANCER') {
+          endpoint = `http://localhost:8080/api/freelancers/${currentUser.id}`
+        } else {
+          endpoint = `http://localhost:8080/api/clients/${currentUser.id}`
+        }
+        console.log(currentUser)
+        const response = await axios.get(endpoint)
+        
+        // Map backend data to frontend form
+        const userData = response.data
+        const mappedData = {
+          name: userData.name,
+          email: userData.email,
+          bio: userData.bio,
+          location: userData.location,
+          skills: userData.skills || [],
+          // Conditional properties based on user role
+          ...(currentUser?.userRole === 'FREELANCER' 
+            ? { hourlyRate: userData.hourlyRate } 
+            : { professionalTitle: userData.professionalTitle })
         }
         
-        setFormData(mockProfileData)
+        setFormData(mappedData)
+      } catch (error) {
+        console.error('Error fetching user data:', error)
+        setErrorMessage('Failed to load profile data. Please try again.')
+      } finally {
+        setIsLoading(false)
       }
-      setIsLoading(false)
-    }, 1000)
+    }
+    
+    fetchUserData()
   }, [currentUser])
 
   const handleChange = (e) => {
@@ -103,71 +87,6 @@ function EditProfile() {
     }))
   }
 
-  const handleEducationChange = (e) => {
-    const { name, value } = e.target
-    setNewEducation(prev => ({
-      ...prev,
-      [name]: value
-    }))
-  }
-
-  const handleEducationAdd = () => {
-    if (newEducation.degree && newEducation.institution) {
-      setFormData(prev => ({
-        ...prev,
-        education: [...prev.education, {
-          id: Date.now(),
-          ...newEducation
-        }]
-      }))
-      setNewEducation({
-        degree: '',
-        institution: '',
-        year: ''
-      })
-    }
-  }
-
-  const handleEducationRemove = (id) => {
-    setFormData(prev => ({
-      ...prev,
-      education: prev.education.filter(edu => edu.id !== id)
-    }))
-  }
-
-  const handleExperienceChange = (e) => {
-    const { name, value } = e.target
-    setNewExperience(prev => ({
-      ...prev,
-      [name]: value
-    }))
-  }
-
-  const handleExperienceAdd = () => {
-    if (newExperience.title && newExperience.company) {
-      setFormData(prev => ({
-        ...prev,
-        experience: [...prev.experience, {
-          id: Date.now(),
-          ...newExperience
-        }]
-      }))
-      setNewExperience({
-        title: '',
-        company: '',
-        period: '',
-        description: ''
-      })
-    }
-  }
-
-  const handleExperienceRemove = (id) => {
-    setFormData(prev => ({
-      ...prev,
-      experience: prev.experience.filter(exp => exp.id !== id)
-    }))
-  }
-
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsSaving(true)
@@ -175,13 +94,39 @@ function EditProfile() {
     setErrorMessage('')
     
     try {
-      // In a real app, this would send the data to your API
-      await updateProfile(formData)
-      setSuccessMessage('Profile updated successfully!')
+      let endpoint = ''
+      let payload = {}
       
-      // Scroll to top to show success message
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+      if (currentUser?.userRole === 'FREELANCER') {
+        endpoint = `http://localhost:8080/api/freelancers/${currentUser.id}`
+        payload = {
+          name: formData.name,
+          email: formData.email,
+          bio: formData.bio,
+          location: formData.location,
+          hourlyRate: parseFloat(formData.hourlyRate) || 0,
+          skills: formData.skills
+        }
+      } else {
+        endpoint = `http://localhost:8080/api/clients/${currentUser.id}`
+        payload = {
+          name: formData.name,
+          email: formData.email,
+          bio: formData.bio,
+          location: formData.location,
+          professionalTitle: formData.professionalTitle,
+          skills: formData.skills
+        }
+      }
+      
+      const response = await axios.put(endpoint, payload)
+      
+      if (response.status === 200) {
+        setSuccessMessage('Profile updated successfully!')
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }
     } catch (error) {
+      console.error('Error updating profile:', error)
       setErrorMessage('Failed to update profile. Please try again.')
     } finally {
       setIsSaving(false)
@@ -269,20 +214,22 @@ function EditProfile() {
                 />
               </div>
               
-              <div>
-                <label htmlFor="title" className="block text-sm font-medium text-secondary-700 mb-1">
-                  Professional Title
-                </label>
-                <input
-                  type="text"
-                  id="title"
-                  name="title"
-                  className="input"
-                  placeholder="e.g., Full Stack Developer"
-                  value={formData.title}
-                  onChange={handleChange}
-                />
-              </div>
+              {currentUser?.userRole === 'CLIENT' && (
+                <div>
+                  <label htmlFor="professionalTitle" className="block text-sm font-medium text-secondary-700 mb-1">
+                    Professional Title
+                  </label>
+                  <input
+                    type="text"
+                    id="professionalTitle"
+                    name="professionalTitle"
+                    className="input"
+                    placeholder="e.g., Project Manager"
+                    value={formData.professionalTitle}
+                    onChange={handleChange}
+                  />
+                </div>
+              )}
               
               <div>
                 <label htmlFor="location" className="block text-sm font-medium text-secondary-700 mb-1">
@@ -299,7 +246,7 @@ function EditProfile() {
                 />
               </div>
               
-              {currentUser?.role === 'freelancer' && (
+              {currentUser?.userRole === 'FREELANCER' && (
                 <div>
                   <label htmlFor="hourlyRate" className="block text-sm font-medium text-secondary-700 mb-1">
                     Hourly Rate (USD)
@@ -320,21 +267,6 @@ function EditProfile() {
                   </div>
                 </div>
               )}
-              
-              <div className="md:col-span-2">
-                <label htmlFor="avatar" className="block text-sm font-medium text-secondary-700 mb-1">
-                  Profile Picture URL
-                </label>
-                <input
-                  type="text"
-                  id="avatar"
-                  name="avatar"
-                  className="input"
-                  placeholder="https://example.com/your-image.jpg"
-                  value={formData.avatar}
-                  onChange={handleChange}
-                />
-              </div>
               
               <div className="md:col-span-2">
                 <label htmlFor="bio" className="block text-sm font-medium text-secondary-700 mb-1">
@@ -406,202 +338,6 @@ function EditProfile() {
                       </svg>
                     </button>
                   </span>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-        
-        <div className="bg-white shadow-md rounded-lg overflow-hidden mb-6">
-          <div className="p-6">
-            <h2 className="text-lg font-semibold text-secondary-900 mb-4">Education</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-              <div>
-                <label htmlFor="degree" className="block text-sm font-medium text-secondary-700 mb-1">
-                  Degree / Certificate
-                </label>
-                <input
-                  type="text"
-                  id="degree"
-                  name="degree"
-                  className="input"
-                  placeholder="e.g., Bachelor of Computer Science"
-                  value={newEducation.degree}
-                  onChange={handleEducationChange}
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="institution" className="block text-sm font-medium text-secondary-700 mb-1">
-                  Institution
-                </label>
-                <input
-                  type="text"
-                  id="institution"
-                  name="institution"
-                  className="input"
-                  placeholder="e.g., University of California"
-                  value={newEducation.institution}
-                  onChange={handleEducationChange}
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="year" className="block text-sm font-medium text-secondary-700 mb-1">
-                  Year
-                </label>
-                <input
-                  type="text"
-                  id="year"
-                  name="year"
-                  className="input"
-                  placeholder="e.g., 2020"
-                  value={newEducation.year}
-                  onChange={handleEducationChange}
-                />
-              </div>
-            </div>
-            
-            <div className="mb-4">
-              <button
-                type="button"
-                className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                onClick={handleEducationAdd}
-              >
-                Add Education
-              </button>
-            </div>
-            
-            {formData.education.length > 0 && (
-              <div className="space-y-4 mt-4 border-t border-secondary-200 pt-4">
-                <h3 className="text-sm font-medium text-secondary-700">Added Education</h3>
-                {formData.education.map(edu => (
-                  <div key={edu.id} className="flex justify-between items-center p-3 bg-secondary-50 rounded-md">
-                    <div>
-                      <p className="font-medium text-secondary-900">{edu.degree}</p>
-                      <p className="text-sm text-secondary-500">
-                        {edu.institution} {edu.year ? `• ${edu.year}` : ''}
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      className="text-red-600 hover:text-red-800"
-                      onClick={() => handleEducationRemove(edu.id)}
-                    >
-                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-        
-        <div className="bg-white shadow-md rounded-lg overflow-hidden mb-6">
-          <div className="p-6">
-            <h2 className="text-lg font-semibold text-secondary-900 mb-4">Work Experience</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div>
-                <label htmlFor="expTitle" className="block text-sm font-medium text-secondary-700 mb-1">
-                  Job Title
-                </label>
-                <input
-                  type="text"
-                  id="expTitle"
-                  name="title"
-                  className="input"
-                  placeholder="e.g., Senior Developer"
-                  value={newExperience.title}
-                  onChange={handleExperienceChange}
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="company" className="block text-sm font-medium text-secondary-700 mb-1">
-                  Company
-                </label>
-                <input
-                  type="text"
-                  id="company"
-                  name="company"
-                  className="input"
-                  placeholder="e.g., Tech Innovations Inc."
-                  value={newExperience.company}
-                  onChange={handleExperienceChange}
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="period" className="block text-sm font-medium text-secondary-700 mb-1">
-                  Period
-                </label>
-                <input
-                  type="text"
-                  id="period"
-                  name="period"
-                  className="input"
-                  placeholder="e.g., 2020 - Present"
-                  value={newExperience.period}
-                  onChange={handleExperienceChange}
-                />
-              </div>
-              
-              <div className="md:col-span-2">
-                <label htmlFor="expDescription" className="block text-sm font-medium text-secondary-700 mb-1">
-                  Description
-                </label>
-                <textarea
-                  id="expDescription"
-                  name="description"
-                  rows="3"
-                  className="input"
-                  placeholder="Describe your responsibilities and achievements..."
-                  value={newExperience.description}
-                  onChange={handleExperienceChange}
-                ></textarea>
-              </div>
-            </div>
-            
-            <div className="mb-4">
-              <button
-                type="button"
-                className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                onClick={handleExperienceAdd}
-              >
-                Add Experience
-              </button>
-            </div>
-            
-            {formData.experience.length > 0 && (
-              <div className="space-y-4 mt-4 border-t border-secondary-200 pt-4">
-                <h3 className="text-sm font-medium text-secondary-700">Added Experience</h3>
-                {formData.experience.map(exp => (
-                  <div key={exp.id} className="p-3 bg-secondary-50 rounded-md">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-medium text-secondary-900">{exp.title}</p>
-                        <p className="text-sm text-secondary-500">
-                          {exp.company} {exp.period ? `• ${exp.period}` : ''}
-                        </p>
-                        {exp.description && (
-                          <p className="text-sm text-secondary-700 mt-1">{exp.description}</p>
-                        )}
-                      </div>
-                      <button
-                        type="button"
-                        className="text-red-600 hover:text-red-800 ml-2"
-                        onClick={() => handleExperienceRemove(exp.id)}
-                      >
-                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
                 ))}
               </div>
             )}
