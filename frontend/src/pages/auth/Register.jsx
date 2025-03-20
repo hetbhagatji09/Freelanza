@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../../contexts/AuthContext.jsx'
+import axios from 'axios'
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -8,13 +8,11 @@ function Register() {
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'freelancer' // Default role
+    role: 'FREELANCER' // Default role in uppercase format for API
   })
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   
-  const { register } = useAuth()
   const navigate = useNavigate()
 
   const handleChange = (e) => {
@@ -39,8 +37,8 @@ function Register() {
       return
     }
     
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters')
+    if (formData.password.length < 4) {
+      setError('Password must be at least 4 characters')
       return
     }
     
@@ -48,25 +46,31 @@ function Register() {
       setError('')
       setIsLoading(true)
       
-      await register({
-        name: formData.name,
-        email: formData.email,
+      // Call the register API with the required format
+      await axios.post('http://localhost:8080/api/auth/register', {
+        username: formData.email, // API expects email as username
         password: formData.password,
-        role: formData.role
+        userRole: formData.role // Using uppercase FREELANCER or CLIENT
       })
       
-      setSuccess('Registration successful! Please check your email for verification.')
+      // Store name in localStorage for future use (since API doesn't support it)
+      localStorage.setItem('userName', formData.name)
       
-      // Redirect to verification page after a delay
-      setTimeout(() => {
-        navigate('/verify-email', { state: { email: formData.email } })
-      }, 2000)
+      // Success - redirect to login page
+      navigate('/login')
       
     } catch (err) {
-      setError(err.message || 'Failed to register')
+      setError(err.response?.data?.message || 'Failed to register. Please try again.')
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleRoleChange = (e) => {
+    setFormData(prev => ({
+      ...prev,
+      role: e.target.value
+    }))
   }
 
   return (
@@ -94,21 +98,6 @@ function Register() {
               </div>
               <div className="ml-3">
                 <p className="text-sm text-red-700">{error}</p>
-              </div>
-            </div>
-          </div>
-        )}
-        
-        {success && (
-          <div className="bg-green-50 border-l-4 border-green-500 p-4">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm text-green-700">{success}</p>
               </div>
             </div>
           </div>
@@ -166,7 +155,7 @@ function Register() {
                 type="password"
                 autoComplete="new-password"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-secondary-300 placeholder-secondary-500 text-secondary-900 rounded-b-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-secondary-300 placeholder-secondary-500 text-secondary-900 focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
                 placeholder="Confirm Password"
                 value={formData.confirmPassword}
                 onChange={handleChange}
@@ -185,9 +174,9 @@ function Register() {
                     id="role-freelancer"
                     name="role"
                     type="radio"
-                    value="freelancer"
-                    checked={formData.role === 'freelancer'}
-                    onChange={handleChange}
+                    value="FREELANCER"
+                    checked={formData.role === 'FREELANCER'}
+                    onChange={handleRoleChange}
                     className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-secondary-300"
                   />
                   <label htmlFor="role-freelancer" className="ml-2 block text-sm text-secondary-700">
@@ -199,9 +188,9 @@ function Register() {
                     id="role-client"
                     name="role"
                     type="radio"
-                    value="client"
-                    checked={formData.role === 'client'}
-                    onChange={handleChange}
+                    value="CLIENT"
+                    checked={formData.role === 'CLIENT'}
+                    onChange={handleRoleChange}
                     className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-secondary-300"
                   />
                   <label htmlFor="role-client" className="ml-2 block text-sm text-secondary-700">

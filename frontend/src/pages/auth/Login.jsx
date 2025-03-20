@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext.jsx'
+import axios from 'axios'
 
 function Login() {
   const [email, setEmail] = useState('')
@@ -25,10 +26,57 @@ function Login() {
     try {
       setError('')
       setIsLoading(true)
+      
+      // Step 1: Get token using login API
+      const tokenResponse = await axios.post('http://localhost:8080/api/auth/token', {
+        username: email,
+        password: password
+      })
+      
+      const token = tokenResponse.data.token
+      
+      if (!token) {
+        throw new Error('No token received from server')
+      }
+      
+      // Step 2: Get user details using the token
+      const userResponse = await axios.get(`http://localhost:8080/api/auth/user?token=${token}`)
+      const userData = userResponse.data
+      
+      // Step 3: Format user data for frontend
+      const userForStorage = {
+        id: userData.id,
+        name: userData.name || email.split('@')[0], // Use name from API or extract from email
+        email: userData.username,
+        role: userData.userRole.toLowerCase(), // Store lowercase for frontend consistency
+        userRole: userData.userRole // Store original format for API calls
+      }
+      
+      // Store data in localStorage
+      localStorage.setItem('token', token)
+      localStorage.setItem('user', JSON.stringify(userForStorage))
+      
+      // Update auth context
       await login(email, password)
-      navigate(from, { replace: true })
+      
+      // Redirect based on user role - Fixed to handle case insensitivity
+      // and provide fallback routes
+      const role = userData.userRole?.toUpperCase();
+      
+      if (role === 'FREELANCER') {
+        // Check if this route exists in your router
+        navigate('/dashboard', { replace: true });
+      } else if (role === 'CLIENT') {
+        // Check if this route exists in your router
+        navigate('/dashboard', { replace: true });
+      } else {
+        // Fallback to a safe route that definitely exists
+        navigate('/dashboard', { replace: true });
+      }
+      
     } catch (err) {
-      setError(err.message || 'Failed to log in')
+      console.error('Login error:', err);
+      setError(err.response?.data?.message || err.message || 'Failed to log in')
     } finally {
       setIsLoading(false)
     }
@@ -108,12 +156,6 @@ function Login() {
                 Remember me
               </label>
             </div>
-
-            <div className="text-sm">
-              <Link to="/forgot-password" className="font-medium text-primary-600 hover:text-primary-500">
-                Forgot your password?
-              </Link>
-            </div>
           </div>
 
           <div>
@@ -139,41 +181,7 @@ function Login() {
           </div>
         </form>
         
-        <div className="mt-6">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-secondary-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-secondary-500">
-                Demo Accounts
-              </span>
-            </div>
-          </div>
-          
-          <div className="mt-6 grid grid-cols-1 gap-3">
-            <button
-              type="button"
-              onClick={() => {
-                setEmail('client@example.com')
-                setPassword('password123')
-              }}
-              className="w-full inline-flex justify-center py-2 px-4 border border-secondary-300 rounded-md shadow-sm bg-white text-sm font-medium text-secondary-700 hover:bg-secondary-50"
-            >
-              Use Client Demo
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setEmail('freelancer@example.com')
-                setPassword('password123')
-              }}
-              className="w-full inline-flex justify-center py-2 px-4 border border-secondary-300 rounded-md shadow-sm bg-white text-sm font-medium text-secondary-700 hover:bg-secondary-50"
-            >
-              Use Freelancer Demo
-            </button>
-          </div>
-        </div>
+        
       </div>
     </div>
   )
