@@ -27,15 +27,11 @@ function DashboardHeader({ openSidebar, user }) {
             <div className="flex-shrink-0 relative">
               <div className="flex items-center">
                 <Link to="/dashboard/edit-profile" className="mr-4 text-sm text-secondary-700 hover:text-secondary-900">
-                  {user?.name}
+                  {user?.email}
                 </Link>
                 <div className="relative">
                   <Link to="/dashboard/edit-profile">
-                    <img
-                      className="h-8 w-8 rounded-full"
-                      src={user?.avatar}
-                      alt={user?.name}
-                    />
+                   
                   </Link>
                 </div>
               </div>

@@ -30,12 +30,12 @@ function Navbar() {
               <Link to="/jobs" className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-secondary-600 hover:text-secondary-800 hover:border-secondary-300">
                 Find Jobs
               </Link>
-              <Link to="/freelancers/1" className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-secondary-600 hover:text-secondary-800 hover:border-secondary-300">
+              {/* <Link to="/freelancers/1" className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-secondary-600 hover:text-secondary-800 hover:border-secondary-300">
                 Freelancers
               </Link>
               <Link to="/clients/1" className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-secondary-600 hover:text-secondary-800 hover:border-secondary-300">
                 Clients
-              </Link>
+              </Link> */}
             </div>
           </div>
           <div className="hidden sm:ml-6 sm:flex sm:items-center">
@@ -51,11 +51,8 @@ function Navbar() {
                     onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
                   >
                     <span className="sr-only">Open user menu</span>
-                    <img
-                      className="h-8 w-8 rounded-full"
-                      src={currentUser.avatar}
-                      alt={currentUser.name}
-                    />
+                      {currentUser.email}
+                    
                   </button>
                 </div>
                 
