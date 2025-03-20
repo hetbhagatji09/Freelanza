@@ -125,24 +125,7 @@ function Dashboard() {
               </div>
             </div>
             
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <div className="flex items-center">
-                <div className="p-3 rounded-full bg-green-100 text-green-600">
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-secondary-500">Total Proposals</p>
-                  <p className="text-2xl font-semibold text-secondary-900">{stats.totalProposals}</p>
-                </div>
-              </div>
-              <div className="mt-4">
-                <Link to="/dashboard/proposals" className="text-sm text-primary-600 hover:text-primary-700">
-                  Review proposals →
-                </Link>
-              </div>
-            </div>
+            
             
             <div className="bg-white rounded-lg shadow-md p-6">
               <div className="flex items-center">
@@ -157,30 +140,13 @@ function Dashboard() {
                 </div>
               </div>
               <div className="mt-4">
-                <Link to="/dashboard/projects" className="text-sm text-primary-600 hover:text-primary-700">
+                <Link to="/dashboard/manage-jobs" className="text-sm text-primary-600 hover:text-primary-700">
                   Manage projects →
                 </Link>
               </div>
             </div>
             
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <div className="flex items-center">
-                <div className="p-3 rounded-full bg-indigo-100 text-indigo-600">
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-secondary-500">Total Spent</p>
-                  <p className="text-2xl font-semibold text-secondary-900">${stats.totalSpent}</p>
-                </div>
-              </div>
-              <div className="mt-4">
-                <Link to="/dashboard/projects" className="text-sm text-primary-600 hover:text-primary-700">
-                  View history →
-                </Link>
-              </div>
-            </div>
+            
           </>
         ) : (
           <>
@@ -203,24 +169,7 @@ function Dashboard() {
               </div>
             </div>
             
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <div className="flex items-center">
-                <div className="p-3 rounded-full bg-green-100 text-green-600">
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-secondary-500">My Proposals</p>
-                  <p className="text-2xl font-semibold text-secondary-900">{stats.submittedProposals}</p>
-                </div>
-              </div>
-              <div className="mt-4">
-                <Link to="/dashboard/my-proposals" className="text-sm text-primary-600 hover:text-primary-700">
-                  View proposals →
-                </Link>
-              </div>
-            </div>
+          
             
             <div className="bg-white rounded-lg shadow-md p-6">
               <div className="flex items-center">
@@ -241,24 +190,7 @@ function Dashboard() {
               </div>
             </div>
             
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <div className="flex items-center">
-                <div className="p-3 rounded-full bg-indigo-100 text-indigo-600">
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-secondary-500">Total Earned</p>
-                  <p className="text-2xl font-semibold text-secondary-900">${stats.totalEarned}</p>
-                </div>
-              </div>
-              <div className="mt-4">
-                <Link to="/dashboard/projects" className="text-sm text-primary-600 hover:text-primary-700">
-                  View history →
-                </Link>
-              </div>
-            </div>
+            
           </>
         )}
       </div>
@@ -281,20 +213,10 @@ function Dashboard() {
                 <span className="font-medium text-secondary-900">Post a New Job</span>
               </Link>
               
-              <Link
-                to="/dashboard/proposals"
-                className="flex items-center p-4 border border-secondary-200 rounded-lg hover:bg-secondary-50"
-              >
-                <div className="p-2 rounded-full bg-green-100 text-green-600 mr-3">
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <span className="font-medium text-secondary-900">Review Proposals</span>
-              </Link>
+           
               
               <Link
-                to="/dashboard/projects"
+                to="/dashboard/manage-jobs"
                 className="flex items-center p-4 border border-secondary-200 rounded-lg hover:bg-secondary-50"
               >
                 <div className="p-2 rounded-full bg-yellow-100 text-yellow-600 mr-3">
@@ -319,17 +241,7 @@ function Dashboard() {
                 <span className="font-medium text-secondary-900">Find New Jobs</span>
               </Link>
               
-              <Link
-                to="/dashboard/my-proposals"
-                className="flex items-center p-4 border border-secondary-200 rounded-lg hover:bg-secondary-50"
-              >
-                <div className="p-2 rounded-full bg-green-100 text-green-600 mr-3">
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <span className="font-medium text-secondary-900">My Proposals</span>
-              </Link>
+             
               
               <Link
                 to="/dashboard/projects"
@@ -345,53 +257,6 @@ function Dashboard() {
             </>
           )}
         </div>
-      </div>
-      
-      {/* Recent Activity */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-lg font-semibold text-secondary-900 mb-4">Recent Activity</h2>
-        
-        {recentActivity.length === 0 ? (
-          <p className="text-secondary-500 text-center py-4">No recent activity to display.</p>
-        ) : (
-          <div className="space-y-4">
-            {recentActivity.map(activity => (
-              <div key={activity.id} className="flex items-start border-b border-secondary-200 pb-4 last:border-0 last:pb-0">
-                <div className={`p-2 rounded-full mr-3 ${
-                  activity.type === 'proposal' ? 'bg-green-100 text-green-600' :
-                  activity.type === 'project' ? 'bg-yellow-100 text-yellow-600' :
-                  activity.type === 'job' ? 'bg-primary-100 text-primary-600' :
-                  'bg-indigo-100 text-indigo-600'
-                }`}>
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    {activity.type === 'proposal' && (
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    )}
-                    {activity.type === 'project' && (
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    )}
-                    {activity.type === 'job' && (
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    )}
-                    {activity.type === 'payment' && (
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    )}
-                  </svg>
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-sm font-medium text-secondary-900">{activity.title}</h3>
-                  <p className="text-sm text-secondary-500">{activity.description}</p>
-                  <div className="flex justify-between items-center mt-1">
-                    <span className="text-xs text-secondary-400">{activity.time}</span>
-                    <Link to={activity.link} className="text-xs text-primary-600 hover:text-primary-700">
-                      View details →
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   )

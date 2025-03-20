@@ -72,7 +72,7 @@ function JobDetails() {
 
   const handleApply = () => {
     if (!isAuthenticated) {
-      navigate('/login', { state: { from: `/jobs/${id}` } })
+      navigate('/login', { state: { from: `/jobs/${jobId}` } })
       return
     }
     
@@ -198,8 +198,8 @@ function JobDetails() {
                       </Link>
                     </h3>
                     <div className="flex items-center text-sm">
-                      <span className="text-yellow-500 mr-1">{job.client.rating}★</span>
-                      <span className="text-secondary-500">({job.client.jobsPosted} jobs)</span>
+                      <span className="text-yellow-500 mr-1">{job.client.ratings}★</span>
+                      {/* <span className="text-secondary-500">({job.client.job} jobs)</span> */}
                     </div>
                   </div>
                 </div>
@@ -208,13 +208,10 @@ function JobDetails() {
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <p className="text-secondary-500">Location</p>
-                      <p className="font-medium text-secondary-900">{job.client.country}</p>
+                      <p className="font-medium text-secondary-900">{job.client.location}</p>
                     </div>
                     <div>
-                      <p className="text-secondary-500">Member Since</p>
-                      <p className="font-medium text-secondary-900">
-                        {new Date(job.client.memberSince).toLocaleDateString()}
-                      </p>
+                      
                     </div>
                   </div>
                 </div>
@@ -236,7 +233,7 @@ function JobDetails() {
                   </div>
                   <div>
                     <p className="text-secondary-500">Location</p>
-                    <p className="font-medium text-secondary-900">{job.location}</p>
+                    <p className="font-medium text-secondary-900">{job.client.location}</p>
                   </div>
                   <div>
                     <p className="text-secondary-500">Posted On</p>
