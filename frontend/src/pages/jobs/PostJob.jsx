@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext.jsx'
+import axios from 'axios'
 
 function PostJob() {
-  const { isClient } = useAuth()
+  const { isClient,currentUser} = useAuth()
   const navigate = useNavigate()
   
   const [formData, setFormData] = useState({
-    title: '',
+    jobTitle: '',
     category: '',
     description: '',
     skills: [],
@@ -87,8 +88,8 @@ function PostJob() {
   const validateForm = () => {
     const newErrors = {}
     
-    if (!formData.title.trim()) {
-      newErrors.title = 'Job title is required'
+    if (!formData.jobTitle.trim()) {
+      newErrors.jobTitle = 'Job title is required'
     }
     
     if (!formData.category) {
@@ -97,7 +98,7 @@ function PostJob() {
     
     if (!formData.description.trim()) {
       newErrors.description = 'Description is required'
-    } else if (formData.description.trim().length < 50) {
+    } else if (formData.description.trim().length < 5 ) {
       newErrors.description = 'Description should be at least 50 characters'
     }
     
@@ -129,31 +130,42 @@ function PostJob() {
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    
-    if (!validateForm()) {
-      return
-    }
-    
-    setIsSubmitting(true)
-    
-    try {
-      // In a real app, this would be an API call to create the job
-      // await axios.post('/api/jobs', formData)
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      setShowSuccessModal(true)
-    } catch (error) {
-      console.error('Error posting job:', error)
-      // Handle error
-    } finally {
-      setIsSubmitting(false)
-    }
+// Replace the handleSubmit function with this:
+const handleSubmit = async (e) => {
+  e.preventDefault()
+  
+  if (!validateForm()) {
+    return
   }
+  
+  setIsSubmitting(true)
+  
+  try {
+    // Format the data according to your API requirements
+    const jobData = {
+      jobTitle: formData.jobTitle,
+      category: formData.category,
+      description: formData.description,
+      skills: formData.skills, // Convert array to comma-separated string if needed
+      minBudget: parseFloat(formData.minBudget),
+      maxBudget: parseFloat(formData.maxBudget),
+      deadline: formData.deadline
+    }
+    
+    
+    // Make API call to create the job
+    const response = await axios.post(`http://localhost:8080/api/jobs/${currentUser.id}`, jobData);
+    console.log(currentUser);
+    
+    // If successful, show success modal
+    setShowSuccessModal(true)
+  } catch (error) {
+    console.error('Error posting job:', error)
+    // Handle error - you might want to show an error message to the user
+  } finally {
+    setIsSubmitting(false)
+  }
+}
 
   const handleSuccessModalClose = () => {
     setShowSuccessModal(false)
@@ -203,15 +215,15 @@ function PostJob() {
                 </label>
                 <input
                   type="text"
-                  id="title"
-                  name="title"
-                  className={`input ${errors.title ? 'border-red-500' : ''}`}
+                  id="jobTitle"
+                  name="jobTitle"
+                  className={`input ${errors.jobTitle ? 'border-red-500' : ''}`}
                   placeholder="e.g., Full Stack Developer for E-commerce Website"
-                  value={formData.title}
+                  value={formData.jobTitle}
                   onChange={handleChange}
                 />
                 {errors.title && (
-                  <p className="mt-1 text-sm text-red-500">{errors.title}</p>
+                  <p className="mt-1 text-sm text-red-500">{errors.jobTitle}</p>
                 )}
               </div>
               

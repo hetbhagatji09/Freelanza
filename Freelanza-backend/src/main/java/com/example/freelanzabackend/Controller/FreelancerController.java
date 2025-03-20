@@ -19,4 +19,12 @@ public class FreelancerController {
     public ResponseEntity<Freelancer> getClientByEmail(@PathVariable String email) {
         return freelancerService.getFreelancerByMail(email);
     }
+    @PutMapping("/{freelancerId}")
+    public ResponseEntity<Freelancer> updateClient(@RequestBody Freelancer freelancer, @PathVariable int freelancerId) {
+        return freelancerService.updateFreelancer(freelancer, freelancerId);
+    }
+    @GetMapping("/{freelancerId}")
+    public ResponseEntity<Freelancer> getClient(@PathVariable int freelancerId) {
+        return freelancerService.getFreelancer(freelancerId);
+    }
 }

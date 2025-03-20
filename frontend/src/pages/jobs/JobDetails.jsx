@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext.jsx'
+import axios from 'axios'
 
 function JobDetails() {
-  const { id } = useParams()
+  const { jobId } = useParams()
   const { isAuthenticated, isFreelancer, currentUser } = useAuth()
   const navigate = useNavigate()
   
@@ -12,56 +13,62 @@ function JobDetails() {
   const [error, setError] = useState(null)
   const [showApplyModal, setShowApplyModal] = useState(false)
   
-  // Mock job data
-  const mockJob = {
-    id: parseInt(id),
-    title: 'Full Stack Developer Needed for E-commerce Site',
-    description: `
-      We are looking for an experienced full-stack developer to build a responsive e-commerce website. The ideal candidate should have strong experience with React for the frontend and Node.js for the backend.
+  // // Mock job data
+  // const mockJob = {
+  //   id: parseInt(id),
+  //   title: 'Full Stack Developer Needed for E-commerce Site',
+  //   description: `
+  //     We are looking for an experienced full-stack developer to build a responsive e-commerce website. The ideal candidate should have strong experience with React for the frontend and Node.js for the backend.
       
-      Key Responsibilities:
-      - Develop a responsive e-commerce website with product catalog, shopping cart, and checkout functionality
-      - Implement user authentication and account management
-      - Integrate with payment gateways (Stripe, PayPal)
-      - Set up a content management system for product management
-      - Ensure the website is optimized for performance and SEO
+  //     Key Responsibilities:
+  //     - Develop a responsive e-commerce website with product catalog, shopping cart, and checkout functionality
+  //     - Implement user authentication and account management
+  //     - Integrate with payment gateways (Stripe, PayPal)
+  //     - Set up a content management system for product management
+  //     - Ensure the website is optimized for performance and SEO
       
-      Requirements:
-      - 3+ years of experience with React and Node.js
-      - Experience with MongoDB and Express
-      - Knowledge of RESTful API design
-      - Understanding of e-commerce workflows and best practices
-      - Strong problem-solving skills and attention to detail
-    `,
-    budget: '$2000-$3000',
-    category: 'Web Development',
-    skills: ['React', 'Node.js', 'MongoDB', 'Express', 'E-commerce'],
-    location: 'Remote',
-    postedDate: '2023-04-15',
-    deadline: '2023-05-15',
-    client: {
-      id: 101,
-      name: 'TechSolutions Inc.',
-      rating: 4.8,
-      jobsPosted: 15,
-      memberSince: '2022-01-10',
-      country: 'United States',
-      avatar: 'https://randomuser.me/api/portraits/men/42.jpg'
-    }
-  }
+  //     Requirements:
+  //     - 3+ years of experience with React and Node.js
+  //     - Experience with MongoDB and Express
+  //     - Knowledge of RESTful API design
+  //     - Understanding of e-commerce workflows and best practices
+  //     - Strong problem-solving skills and attention to detail
+  //   `,
+  //   budget: '$2000-$3000',
+  //   category: 'Web Development',
+  //   skills: ['React', 'Node.js', 'MongoDB', 'Express', 'E-commerce'],
+  //   location: 'Remote',
+  //   postedDate: '2023-04-15',
+  //   deadline: '2023-05-15',
+  //   client: {
+  //     id: 101,
+  //     name: 'TechSolutions Inc.',
+  //     rating: 4.8,
+  //     jobsPosted: 15,
+  //     memberSince: '2022-01-10',
+  //     country: 'United States',
+  //     avatar: 'https://randomuser.me/api/portraits/men/42.jpg'
+  //   }
+  // }
 
   useEffect(() => {
     // Simulate API call
     setTimeout(() => {
       try {
-        setJob(mockJob)
+        const getchData =async()=>{
+          const response=await axios.get(`http://localhost:8080/api/jobs/${jobId}`);
+          setJob(response.data)
+          console.log(response.data)
+        } 
+        getchData();
+        
         setIsLoading(false)
       } catch (err) {
         setError('Failed to load job details')
         setIsLoading(false)
       }
     }, 1000)
-  }, [id])
+  }, [jobId])
 
   const handleApply = () => {
     if (!isAuthenticated) {
@@ -139,9 +146,7 @@ function JobDetails() {
                   <span className="mr-4">
                     Deadline: {new Date(job.deadline).toLocaleDateString()}
                   </span>
-                  <span>
-                    Location: {job.location}
-                  </span>
+                 
                 </div>
                 
                 <div className="flex flex-wrap gap-2 mb-6">
@@ -185,14 +190,10 @@ function JobDetails() {
                 <h2 className="text-lg font-semibold text-secondary-900 mb-4">About the Client</h2>
                 
                 <div className="flex items-center mb-4">
-                  <img
-                    src={job.client.avatar}
-                    alt={job.client.name}
-                    className="h-12 w-12 rounded-full mr-4"
-                  />
+                  
                   <div>
                     <h3 className="font-medium text-secondary-900">
-                      <Link to={`/clients/${job.client.id}`} className="hover:text-primary-600">
+                      <Link to={`/clients/${job.client.clientId}`} className="hover:text-primary-600">
                         {job.client.name}
                       </Link>
                     </h3>
@@ -271,7 +272,7 @@ function JobDetails() {
                 <div className="sm:flex sm:items-start">
                   <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
                     <h3 className="text-lg leading-6 font-medium text-secondary-900 mb-4">
-                      Apply for "{job.title}"
+                      Apply for "{job.jobTitle}"
                     </h3>
                     
                     <form>

@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,6 +28,7 @@ public class JobService {
 
         Client client = clientOptional.get();
         job.setClient(client);
+        job.setPostedDate(LocalDate.now());
         Job savedJob = jobRepository.save(job);
 
         return new ResponseEntity<>(savedJob, HttpStatus.CREATED);
@@ -51,5 +53,14 @@ public class JobService {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
+    }
+
+    public ResponseEntity<Job> getJobById(int jobId) {
+        Optional<Job> jobOptional = jobRepository.findById(jobId);
+        if (jobOptional.isPresent()) {
+            return new ResponseEntity<>(jobOptional.get(), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 }

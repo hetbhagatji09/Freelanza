@@ -28,5 +28,9 @@ public class JobController {
     public ResponseEntity<List<Job>> getJobsByClient(@PathVariable int clientId) {
         return jobService.getJobsByClient(clientId);
     }
+    @GetMapping("/{jobId}")
+    public ResponseEntity<Job> getJobById(@PathVariable int jobId) {
+        return jobService.getJobById(jobId);
+    }
 
 }
