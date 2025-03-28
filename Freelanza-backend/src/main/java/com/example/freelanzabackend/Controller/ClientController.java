@@ -17,4 +17,12 @@ public class ClientController {
     public ResponseEntity<Client> getClientByEmail(@PathVariable String email) {
         return clientService.getClientByEmail(email);
     }
+    @PutMapping("/{clientId}")
+    public ResponseEntity<Client> updateClient(@RequestBody Client client, @PathVariable int clientId) {
+        return clientService.updateClient(client, clientId);
+    }
+    @GetMapping("/{clientId}")
+    public ResponseEntity<Client> getClient(@PathVariable int clientId) {
+        return clientService.getClient(clientId);
+    }
 }

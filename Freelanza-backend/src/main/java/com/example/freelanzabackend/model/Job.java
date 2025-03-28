@@ -37,6 +37,10 @@ public class Job {
     @JsonIgnoreProperties("jobs")
     @JoinColumn(name = "client_id", nullable = false)
     private Client client;
+    @OneToMany(mappedBy = "job", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties("job")
+    private List<Proposal> proposals = new ArrayList<>();
+
 
 
     @Enumerated(EnumType.STRING)

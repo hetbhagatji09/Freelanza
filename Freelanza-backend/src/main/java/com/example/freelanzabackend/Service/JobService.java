@@ -28,6 +28,7 @@ public class JobService {
 
         Client client = clientOptional.get();
         job.setClient(client);
+        job.setBudget((job.getMaxBudget()+job.getMinBudget())/2);
         job.setPostedDate(LocalDate.now());
         Job savedJob = jobRepository.save(job);
 
@@ -61,6 +62,15 @@ public class JobService {
             return new ResponseEntity<>(jobOptional.get(), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    public ResponseEntity<Integer> getCountActiveJobs(int clientId) {
+        try{
+            Integer count = jobRepository.countActiveJobsByClientId(clientId);
+            return new ResponseEntity<>(count, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

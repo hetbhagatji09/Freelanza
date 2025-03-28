@@ -32,5 +32,11 @@ public class JobController {
     public ResponseEntity<Job> getJobById(@PathVariable int jobId) {
         return jobService.getJobById(jobId);
     }
+    @GetMapping("active/{clientId}")
+    public ResponseEntity<Integer> getCountActiveJobs(@PathVariable int clientId){
+        return jobService.getCountActiveJobs(clientId);
+
+    }
+
 
 }
