@@ -42,11 +42,7 @@ function Footer() {
                   Find Work
                 </Link>
               </li>
-              <li>
-                <Link to="/dashboard/my-proposals" className="text-secondary-600 hover:text-primary-600">
-                  My Proposals
-                </Link>
-              </li>
+             
               <li>
                 <Link to="/dashboard/projects" className="text-secondary-600 hover:text-primary-600">
                   Active Projects
@@ -71,11 +67,6 @@ function Footer() {
               <li>
                 <Link to="/dashboard/manage-jobs" className="text-secondary-600 hover:text-primary-600">
                   Manage Jobs
-                </Link>
-              </li>
-              <li>
-                <Link to="/dashboard/proposals" className="text-secondary-600 hover:text-primary-600">
-                  Review Proposals
                 </Link>
               </li>
               <li>

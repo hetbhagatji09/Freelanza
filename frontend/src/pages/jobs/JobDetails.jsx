@@ -51,24 +51,67 @@ function JobDetails() {
   //   }
   // }
 
+   // New state for proposal form
+   const [proposalForm, setProposalForm] = useState({
+    coverLetter: '',
+    bidAmount: '',
+    deliveryDays: ''
+  })
+
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
+    const fetchData = async () => {
       try {
-        const getchData =async()=>{
-          const response=await axios.get(`http://localhost:8080/api/jobs/${jobId}`);
-          setJob(response.data)
-          console.log(response.data)
-        } 
-        getchData();
-        
+        const response = await axios.get(`http://localhost:8080/api/jobs/${jobId}`)
+        setJob(response.data)
         setIsLoading(false)
       } catch (err) {
         setError('Failed to load job details')
         setIsLoading(false)
       }
-    }, 1000)
+    }
+    fetchData()
   }, [jobId])
+
+  // Handle input changes in proposal form
+  const handleProposalChange = (e) => {
+    const { name, value } = e.target
+    setProposalForm(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
+  const handleSubmitProposal = async () => {
+    try {
+      // Validate form data
+      if (!proposalForm.coverLetter || !proposalForm.bidAmount || !proposalForm.deliveryDays) {
+        alert('Please fill in all fields')
+        return
+      }
+
+      // Prepare proposal data
+      const proposalData = {
+        coverLetter: proposalForm.coverLetter,
+        bidAmount: parseFloat(proposalForm.bidAmount),
+        applicationDate: new Date().toISOString().split('T')[0],
+        deliveryDays: parseInt(proposalForm.deliveryDays)
+      }
+
+      // Make API call to submit proposal
+      const response = await axios.post(
+        `http://localhost:8080/api/proposals/apply/${jobId}/${currentUser.id}`, 
+        proposalData
+      )
+
+      // Handle successful submission
+      alert('Proposal submitted successfully!')
+      setShowApplyModal(false)
+      navigate('/dashboard/my-proposals')
+    } catch (err) {
+      console.error('Error submitting proposal:', err)
+      alert('Failed to submit proposal. Please try again.')
+    }
+  }
 
   const handleApply = () => {
     if (!isAuthenticated) {
@@ -77,12 +120,19 @@ function JobDetails() {
     }
     
     if (!isFreelancer) {
-      // Show error or notification that only freelancers can apply
+      alert('Only freelancers can apply for jobs')
       return
     }
     
+    // Reset proposal form when modal opens
+    setProposalForm({
+      coverLetter: '',
+      bidAmount: '',
+      deliveryDays: ''
+    })
     setShowApplyModal(true)
   }
+
 
   if (isLoading) {
     return (
@@ -254,116 +304,97 @@ function JobDetails() {
         </div>
       </div>
       
-      {/* Apply Modal */}
       {showApplyModal && (
-        <div className="fixed inset-0 overflow-y-auto z-50">
-          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-              <div className="absolute inset-0 bg-secondary-500 opacity-75"></div>
-            </div>
-            
-            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div className="sm:flex sm:items-start">
-                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                    <h3 className="text-lg leading-6 font-medium text-secondary-900 mb-4">
-                      Apply for "{job.jobTitle}"
-                    </h3>
-                    
-                    <form>
-                      <div className="mb-4">
-                        <label htmlFor="coverLetter" className="block text-sm font-medium text-secondary-700 mb-1">
-                          Cover Letter
-                        </label>
-                        <textarea
-                          id="coverLetter"
-                          rows="4"
-                          className="input"
-                          placeholder="Introduce yourself and explain why you're a good fit for this job..."
-                        ></textarea>
-                      </div>
-                      
-                      <div className="mb-4">
-                        <label htmlFor="bid" className="block text-sm font-medium text-secondary-700 mb-1">
-                          Your Bid (Budget: {job.budget})
-                        </label>
-                        <div className="mt-1 relative rounded-md shadow-sm">
-                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <span className="text-secondary-500 sm:text-sm">$</span>
-                          </div>
-                          <input
-                            type="number"
-                            name="bid"
-                            id="bid"
-                            className="input pl-7"
-                            placeholder="0.00"
-                          />
-                        </div>
-                      </div>
-                      
-                      <div className="mb-4">
-                        <label htmlFor="deliveryTime" className="block text-sm font-medium text-secondary-700 mb-1">
-                          Delivery Time (Days)
-                        </label>
-                        <input
-                          type="number"
-                          id="deliveryTime"
-                          className="input"
-                          placeholder="Enter number of days"
-                          min="1"
-                        />
-                      </div>
-                      
-                      <div>
-                        <label htmlFor="attachments" className="block text-sm font-medium text-secondary-700 mb-1">
-                          Attachments (Optional)
-                        </label>
-                        <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-secondary-300 border-dashed rounded-md">
-                          <div className="space-y-1 text-center">
-                            <svg className="mx-auto h-12 w-12 text-secondary-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
-                              <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                            <div className="flex text-sm text-secondary-600">
-                              <label htmlFor="file-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-primary-600 hover:text-primary-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary-500">
-                                <span>Upload files</span>
-                                <input id="file-upload" name="file-upload" type="file" className="sr-only" multiple />
-                              </label>
-                              <p className="pl-1">or drag and drop</p>
-                            </div>
-                            <p className="text-xs text-secondary-500">
-                              PDF, DOC, PNG, JPG up to 10MB
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </form>
+    <div className="fixed inset-0 overflow-y-auto z-50">
+      <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+          <div className="absolute inset-0 bg-secondary-500 opacity-75"></div>
+        </div>
+        
+        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        
+        <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+          <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <div className="sm:flex sm:items-start">
+              <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                <h3 className="text-lg leading-6 font-medium text-secondary-900 mb-4">
+                  Apply for "{job.title}"
+                </h3>
+                
+                <form>
+                  <div className="mb-4">
+                    <label htmlFor="coverLetter" className="block text-sm font-medium text-secondary-700 mb-1">
+                      Cover Letter
+                    </label>
+                    <textarea
+                      id="coverLetter"
+                      name="coverLetter"
+                      rows="4"
+                      className="input"
+                      placeholder="Introduce yourself and explain why you're a good fit for this job..."
+                      value={proposalForm.coverLetter}
+                      onChange={handleProposalChange}
+                    ></textarea>
                   </div>
-                </div>
-              </div>
-              <div className="bg-secondary-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                <button
-                  type="button"
-                  className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary-600 text-base font-medium text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:ml-3 sm:w-auto sm:text-sm"
-                  onClick={() => {
-                    setShowApplyModal(false)
-                    navigate('/dashboard/my-proposals')
-                  }}
-                >
-                  Submit Proposal
-                </button>
-                <button
-                  type="button"
-                  className="mt-3 w-full inline-flex justify-center rounded-md border border-secondary-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-secondary-700 hover:bg-secondary-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                  onClick={() => setShowApplyModal(false)}
-                >
-                  Cancel
-                </button>
+                  
+                  <div className="mb-4">
+                    <label htmlFor="bidAmount" className="block text-sm font-medium text-secondary-700 mb-1">
+                      Your Bid (Budget: {job.budget})
+                    </label>
+                    <div className="mt-1 relative rounded-md shadow-sm">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <span className="text-secondary-500 sm:text-sm">$</span>
+                      </div>
+                      <input
+                        type="number"
+                        name="bidAmount"
+                        id="bidAmount"
+                        className="input pl-7"
+                        placeholder="0.00"
+                        value={proposalForm.bidAmount}
+                        onChange={handleProposalChange}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="mb-4">
+                    <label htmlFor="deliveryDays" className="block text-sm font-medium text-secondary-700 mb-1">
+                      Delivery Time (Days)
+                    </label>
+                    <input
+                      type="number"
+                      id="deliveryDays"
+                      name="deliveryDays"
+                      className="input"
+                      placeholder="Enter number of days"
+                      min="1"
+                      value={proposalForm.deliveryDays}
+                      onChange={handleProposalChange}
+                    />
+                  </div>
+                </form>
               </div>
             </div>
           </div>
+          <div className="bg-secondary-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+            <button
+              type="button"
+              className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary-600 text-base font-medium text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:ml-3 sm:w-auto sm:text-sm"
+              onClick={handleSubmitProposal}
+            >
+              Submit Proposal
+            </button>
+            <button
+              type="button"
+              className="mt-3 w-full inline-flex justify-center rounded-md border border-secondary-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-secondary-700 hover:bg-secondary-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+              onClick={() => setShowApplyModal(false)}
+            >
+              Cancel
+            </button>
+          </div>
         </div>
+      </div>
+    </div>
       )}
     </div>
   )

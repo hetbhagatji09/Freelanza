@@ -1,80 +1,55 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext.jsx'
+import axios from 'axios'
 
 function MyProposals() {
-  const { isFreelancer } = useAuth()
+  const { isFreelancer, currentUser } = useAuth()
   const [proposals, setProposals] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('all')
-  
-  // Mock data
-  const mockProposals = [
-    {
-      id: 1,
-      job: {
-        id: 1,
-        title: 'Full Stack Developer Needed for E-commerce Site',
-        budget: '$2000-$3000',
-        client: {
-          id: 101,
-          name: 'TechSolutions Inc.',
-          avatar: 'https://randomuser.me/api/portraits/men/42.jpg'
-        }
-      },
-      coverLetter: "I'm a full stack developer with 5+ years of experience building e-commerce websites using React and Node.js. I've worked on similar projects for clients in retail and fashion industries. I'm confident I can deliver a high-quality, responsive e-commerce site that meets all your requirements.",
-      bid: 2500,
-      deliveryTime: 30,
-      status: 'pending',
-      submittedAt: '2023-04-16'
-    },
-    {
-      id: 2,
-      job: {
-        id: 2,
-        title: 'Logo Design for New Startup',
-        budget: '$500-$800',
-        client: {
-          id: 102,
-          name: 'AI Innovations',
-          avatar: 'https://randomuser.me/api/portraits/men/67.jpg'
-        }
-      },
-      coverLetter: "I'm a professional graphic designer with 7+ years of experience creating logos and brand identities for startups and established businesses. I specialize in creating modern, minimalist designs that are memorable and versatile. I'd love to help bring your brand to life.",
-      bid: 650,
-      deliveryTime: 7,
-      status: 'accepted',
-      submittedAt: '2023-04-19',
-      acceptedAt: '2023-04-21'
-    },
-    {
-      id: 3,
-      job: {
-        id: 3,
-        title: 'Content Writer for Technology Blog',
-        budget: '$30-$50 per article',
-        client: {
-          id: 103,
-          name: 'TechBlog Media',
-          avatar: 'https://randomuser.me/api/portraits/women/33.jpg'
-        }
-      },
-      coverLetter: "I'm a technology writer with experience creating engaging content about emerging technologies. I have a background in computer science and can explain complex technical concepts in an accessible way. I'd love to contribute to your blog.",
-      bid: 40,
-      deliveryTime: 3,
-      status: 'rejected',
-      submittedAt: '2023-04-10',
-      rejectedAt: '2023-04-12'
-    }
-  ]
+  const [error, setError] = useState(null)
 
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setProposals(mockProposals)
-      setIsLoading(false)
-    }, 1000)
-  }, [])
+    const fetchProposals = async () => {
+      if (!isFreelancer) return
+
+      try {
+        const response = await axios.get(`http://localhost:8080/api/proposals/freelancer/${currentUser.id}`)
+        
+        // Transform the data to remove unnecessary attributes
+        const transformedProposals = response.data.map(proposal => ({
+          id: proposal.proposalId,
+          job: {
+            id: proposal.job.jobId,
+            title: proposal.job.jobTitle,
+            budget: `$${proposal.job.minBudget}-$${proposal.job.maxBudget}`,
+            category: proposal.job.category,
+            client: {
+              id: proposal.job.client.clientId,
+              name: proposal.job.client.name,
+              location: proposal.job.client.location,
+              ratings: proposal.job.client.ratings
+            }
+          },
+          coverLetter: proposal.coverLetter,
+          bid: proposal.bidAmount,
+          deliveryTime: proposal.deliveryDays,
+          status: proposal.status.toLowerCase(),
+          submittedAt: proposal.applicationDate
+        }))
+
+        setProposals(transformedProposals)
+        setIsLoading(false)
+      } catch (err) {
+        console.error('Error fetching proposals:', err)
+        setError('Failed to load proposals')
+        setIsLoading(false)
+      }
+    }
+
+    fetchProposals()
+  }, [isFreelancer, currentUser])
 
   // Filter proposals based on active tab
   const filteredProposals = proposals.filter(proposal => {
@@ -103,6 +78,27 @@ function MyProposals() {
     )
   }
 
+  // Error handling
+  if (error) {
+    return (
+      <div className="bg-white rounded-lg shadow-md p-8 text-center">
+        <svg className="mx-auto h-12 w-12 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h3 className="mt-2 text-lg font-medium text-secondary-900">Error</h3>
+        <p className="mt-1 text-secondary-500">{error}</p>
+        <div className="mt-6">
+          <button
+            onClick={() => window.location.reload()}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div>
       <div className="mb-8">
@@ -113,46 +109,19 @@ function MyProposals() {
       {/* Tabs */}
       <div className="mb-6 border-b border-secondary-200">
         <nav className="-mb-px flex space-x-8">
-          <button
-            className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'all'
-                ? 'border-primary-500 text-primary-600'
-                : 'border-transparent text-secondary-500 hover:text-secondary-700 hover:border-secondary-300'
-            }`}
-            onClick={() => setActiveTab('all')}
-          >
-            All Proposals
-          </button>
-          <button
-            className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'pending'
-                ? 'border-primary-500 text-primary-600'
-                : 'border-transparent text-secondary-500 hover:text-secondary-700 hover:border-secondary-300'
-            }`}
-            onClick={() => setActiveTab('pending')}
-          >
-            Pending
-          </button>
-          <button
-            className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'accepted'
-                ? 'border-primary-500 text-primary-600'
-                : 'border-transparent text-secondary-500 hover:text-secondary-700 hover:border-secondary-300'
-            }`}
-            onClick={() => setActiveTab('accepted')}
-          >
-            Accepted
-          </button>
-          <button
-            className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'rejected'
-                ? 'border-primary-500 text-primary-600'
-                : 'border-transparent text-secondary-500 hover:text-secondary-700 hover:border-secondary-300'
-            }`}
-            onClick={() => setActiveTab('rejected')}
-          >
-            Rejected
-          </button>
+          {['all', 'pending', 'accepted', 'rejected'].map((tab) => (
+            <button
+              key={tab}
+              className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === tab
+                  ? 'border-primary-500 text-primary-600'
+                  : 'border-transparent text-secondary-500 hover:text-secondary-700 hover:border-secondary-300'
+              }`}
+              onClick={() => setActiveTab(tab)}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)} Proposals
+            </button>
+          ))}
         </nav>
       </div>
       
@@ -194,11 +163,6 @@ function MyProposals() {
                       </Link>
                     </h2>
                     <div className="flex items-center text-sm text-secondary-500 mb-2">
-                      <img
-                        src={proposal.job.client.avatar}
-                        alt={proposal.job.client.name}
-                        className="h-5 w-5 rounded-full mr-2"
-                      />
                       <Link to={`/clients/${proposal.job.client.id}`} className="hover:text-primary-600">
                         {proposal.job.client.name}
                       </Link>
@@ -223,25 +187,11 @@ function MyProposals() {
                         ? 'bg-green-100 text-green-800'
                         : 'bg-red-100 text-red-800'
                     }`}>
-                      {proposal.status === 'pending' 
-                        ? 'Pending' 
-                        : proposal.status === 'accepted'
-                        ? 'Accepted'
-                        : 'Rejected'}
+                      {proposal.status.charAt(0).toUpperCase() + proposal.status.slice(1)}
                     </span>
                     <span className="text-xs text-secondary-500 mt-1">
                       Submitted: {new Date(proposal.submittedAt).toLocaleDateString()}
                     </span>
-                    {proposal.acceptedAt && (
-                      <span className="text-xs text-secondary-500 mt-1">
-                        Accepted: {new Date(proposal.acceptedAt).toLocaleDateString()}
-                      </span>
-                    )}
-                    {proposal.rejectedAt && (
-                      <span className="text-xs text-secondary-500 mt-1">
-                        Rejected: {new Date(proposal.rejectedAt).toLocaleDateString()}
-                      </span>
-                    )}
                   </div>
                 </div>
                 
@@ -258,11 +208,11 @@ function MyProposals() {
                     View Job Details
                   </Link>
                   
-                  {proposal.status === 'pending' && (
+                  {/* {proposal.status === 'pending' && (
                     <button className="text-red-600 hover:text-red-700 text-sm font-medium">
                       Withdraw Proposal
                     </button>
-                  )}
+                  )} */}
                   
                   {proposal.status === 'accepted' && (
                     <Link

@@ -53,10 +53,10 @@ function App() {
         <Route path="reset-password" element={<ResetPassword />} />
         <Route path="verify-email" element={<VerifyEmail />} />
         <Route path="jobs" element={<JobListings />} />
-        <Route path="jobs/:id" element={<JobDetails />} />
+        <Route path="jobs/:jobId" element={<JobDetails />} />
         <Route path="freelancers/:id" element={<FreelancerProfile />} />
-        <Route path="clients/:id" element={<ClientProfile />} />
-        <Route path="*" element={<NotFound />} />
+        <Route path="clients/:clientId" element={<ClientProfile />} />
+        <Route path="/*" element={<NotFound />} />
       </Route>
 
       {/* Protected Routes */}
